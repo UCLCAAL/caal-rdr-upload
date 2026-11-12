@@ -38,69 +38,86 @@ This project is a collaboration between **UCL CAAL** and **UCL Advanced Research
 
 ### Installation
 
-<!-- How to build or install the application. -->
+We recommend using [uv](https://docs.astral.sh/uv/getting-started/installation/) to manage Python environments.
 
-We recommend installing in a project specific virtual environment created using
-a environment management tool such as
-[uv](https://docs.astral.sh/uv/). To install the latest
-development version of `caal-rdr-upload` using `uv pip` in the currently active
-environment run
-
-```sh
-uv pip install git+https://github.com/UCLCAAL/caal-rdr-upload.git
-```
-
-Alternatively create a local clone of the repository with
+**For developers:** Clone the repository and install the project with all development, testing and documentation dependencies:
 
 ```sh
 git clone https://github.com/UCLCAAL/caal-rdr-upload.git
+cd caal-rdr-upload
+uv venv
+uv pip install -e . --group dev
 ```
 
-and then install in editable mode by running
+**For users:** Create a virtual environment and install the package directly from GitHub:
 
 ```sh
-uv pip install -e .
+uv venv
+uv pip install git+https://github.com/UCLCAAL/caal-rdr-upload.git
+```
+
+Activate the virtual environment:
+
+**Windows (PowerShell):**
+
+```powershell
+.\.venv\Scripts\Activate.ps1
+```
+
+**macOS/Linux:**
+
+```sh
+source .venv/bin/activate
 ```
 
 ### Running Locally
 
-How to run the application on your local system.
+Usage instructions will be added when available.
 
 ### Running Tests
 
-<!-- How to run tests on your local system. -->
-
-Tests can be run across all compatible Python versions in isolated environments
-using [`tox`](https://tox.wiki/en/latest/) by running
+Install the testing dependencies:
 
 ```sh
-tox
+uv pip install -e . --group test
 ```
 
-To run tests manually in a Python environment with `pytest` installed run
+Run the tests:
 
 ```sh
 pytest tests
 ```
 
-again from the root of the repository.
-
-### Building Documentation
-
-The MkDocs HTML documentation can be built locally by running
+To run tests across Python 3.11–3.14 using [tox](https://tox.wiki/en/latest/), run:
 
 ```sh
-tox -e docs
+uv python install 3.11 3.12 3.13 3.14
+uv run tox
+```
+### Building Documentation
+
+Install the documentation dependencies:
+
+```sh
+uv pip install -e . --group docs
 ```
 
-from the root of the repository. The built documentation will be written to
-`site`.
-
-Alternatively to build and preview the documentation locally, in a Python
-environment with the `docs` dependency group installed, run
+Preview the documentation locally:
 
 ```sh
 mkdocs serve
+```
+
+To build and validate the HTML documentation in `site/`:
+
+```sh
+mkdocs build --strict
+```
+
+Alternatively, build in an isolated environment using [tox](https://tox.wiki/en/latest/):
+
+```sh
+tox -e docs
 ```
 
 ## Acknowledgements
