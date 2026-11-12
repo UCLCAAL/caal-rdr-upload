@@ -2,9 +2,7 @@ cff-version: 1.2.0
 message: "If you use this software, please cite it as below."
 type: software
 authors:
-  - family-names: "CAAL"
-    given-names: "UCL"
-    email: "ucl.caal@ucl.ac.uk"
+  - name: "UCL CAAL"
 repository-code: "https://github.com/UCLCAAL/caal-rdr-upload"
 title: "CAAL RDR Upload: Bulk uploads of CAAL monument reports and metadata to UCL RDR via Figshare API"
 license: "MIT"
