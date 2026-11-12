@@ -26,22 +26,7 @@ College London.
 
 ### Project Team
 
-UCL CAAL ([ucl.caal@ucl.ac.uk](mailto:ucl.caal@ucl.ac.uk))
-
-<!-- TODO: how do we have an array of collaborators ? -->
-
-### Research Software Engineering Contact
-
-Centre for Advanced Research Computing, University College London
-([arc.collaborations@ucl.ac.uk](mailto:arc.collaborations@ucl.ac.uk))
-
-## Built With
-
-<!-- TODO: can cookiecutter make a list of frameworks? -->
-
-- [Framework 1](https://something.com)
-- [Framework 2](https://something.com)
-- [Framework 3](https://something.com)
+This project is a collaboration between **UCL CAAL** and **UCL Advanced Research Computing (ARC)**.
 
 ## Getting Started
 
@@ -117,13 +102,6 @@ environment with the `docs` dependency group installed, run
 ```sh
 mkdocs serve
 ```
-
-## Roadmap
-
-- [x] Initial Research
-- [ ] Minimum viable product <-- You are Here
-- [ ] Alpha Release
-- [ ] Feature-Complete Release
 
 ## Acknowledgements
 
