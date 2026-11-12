@@ -27,6 +27,7 @@ coverage.xml
 .venv
 env/
 venv/
+uv.lock
 
 # mkdocs documentation
 /site
