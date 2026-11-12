@@ -16,9 +16,11 @@
 [license-badge]:            https://img.shields.io/badge/License-MIT-yellow.svg
 <!-- prettier-ignore-end -->
 
-Bulk uploads of CAAL monument reports and metadata to UCL RDR via Figshare API
+🚧 **Under development**
 
-This project is developed in collaboration with the
+Bulk uploads of CAAL monument reports and metadata to UCL RDR via Figshare API.
+
+This project is being developed in collaboration with the
 [Centre for Advanced Research Computing](https://ucl.ac.uk/arc), University
 College London.
 
