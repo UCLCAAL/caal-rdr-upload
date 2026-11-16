@@ -42,7 +42,7 @@ This project is a collaboration between **UCL CAAL** and **UCL Advanced Research
 
 We recommend using [uv](https://docs.astral.sh/uv/getting-started/installation/) to manage Python environments.
 
-**For developers:** Clone the repository and install the project with all development, testing and documentation dependencies:
+**For developers:** Clone the repository and install the project its development dependencies:
 
 ```sh
 git clone https://github.com/UCLCAAL/caal-rdr-upload.git
@@ -72,6 +72,24 @@ Activate the virtual environment:
 source .venv/bin/activate
 ```
 
+### Pre-commit Checks
+
+We use [pre-commit](https://pre-commit.com/) to run automated checks before each commit.
+
+After installing the developer dependencies, enable the Git hooks:
+
+```sh
+pre-commit install
+```
+
+The checks will then run automatically whenever you commit using `git commit`.
+
+To run the checks manually:
+
+```sh
+pre-commit run
+```
+
 ### Running Locally
 
 Usage instructions will be added when available.
@@ -96,6 +114,7 @@ To run tests across Python 3.11–3.14 using [tox](https://tox.wiki/en/latest/),
 uv python install 3.11 3.12 3.13 3.14
 uv run tox
 ```
+
 ### Building Documentation
 
 Install the documentation dependencies:
