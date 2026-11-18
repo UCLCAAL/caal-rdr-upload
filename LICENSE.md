@@ -1,4 +1,5 @@
-<!-- markdownlint-disable MD041 --># MIT License
+<!-- markdownlint-disable MD041 -->
+# MIT License
 
 Copyright (c) 2026 UCL CAAL
 
