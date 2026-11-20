@@ -14,6 +14,9 @@ Every run creates a new draft, so delete test drafts you no longer need on RDR.
 
 How to run
 ----------
+Make sure you are connected to the UCL VPN. And have the CAAL RDSS mounted on your
+R drive.
+
 1. Create an RDR FIGSHARE token:
    - https://rdr.ucl.ac.uk/account/integrations
    Never commit the token or share it; anyone with it can upload to your account.
@@ -110,8 +113,7 @@ def find_article_folder(
 def main() -> None:
     """Upload the first CAAL article as a draft."""
     index = int(sys.argv[1]) if len(sys.argv) > 1 else 0  # which article; 0 = first
-    max_files = 2  # TEST: only upload the first 2 files. Use MAX_FILES for all.
-
+    max_files = 1
     # 1. Read the CSV. "Digital Folder Name" is the folder's path on RDSS, e.g.
     #    KG/KG_AS/KG_AS_IHDSS/KG_AS_IHDSS-AB/KG_AS_IHDSS-AB_000031, so each row
     #    is stored under the last part of that path. (The "Caal id" column,
