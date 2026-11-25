@@ -1,10 +1,11 @@
 """
-Upload one CAAL article from RDSS to UCL RDR as a draft (#14).
+Upload selected CAAL articles from RDSS to UCL RDR as a draft (#14).
 
 Steps:
     1. Read the archive CSV.
     2. Find an article folder on RDSS that has a row in the CSV (the first one
        by default, or the one at the index given on the command line).
+       Use the bulk_upload flag to select more than one to upload.
     3. Create a draft article on Figshare with the title and description.
     4. Upload the folder's PDF and TIF files.
     5. Fetch the article and print what is on Figshare.
@@ -37,10 +38,12 @@ R drive.
        python scripts/upload_article.py 3    # fourth article (index 3)
 """
 
+import argparse
 import csv
 import os
 import re
 import sys
+import time
 from pathlib import Path
 from typing import Any
 
@@ -112,8 +115,22 @@ def find_article_folder(
 
 def main() -> None:
     """Upload the first CAAL article as a draft."""
-    index = int(sys.argv[1]) if len(sys.argv) > 1 else 0  # which article; 0 = first
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "-i", "--start_index", type=int, default=0,
+        help="index of first row to start with in archive csv (default = 0)"
+    )
+    parser.add_argument(
+        "-b", "--bulk_upload", type=int, default=1,
+        help="number of articles to upload (default = 1)"
+    )
+    parser.add_argument("-v", "--verbose", action="store_true")
+    args = parser.parse_args()
+    index = args.start_index  # which article; 0 = first
+    num_articles = args.bulk_upload  # number of articles to upload
     max_files = 1
+    time_start = time.perf_counter()
+
     # 1. Read the CSV. "Digital Folder Name" is the folder's path on RDSS, e.g.
     #    KG/KG_AS/KG_AS_IHDSS/KG_AS_IHDSS-AB/KG_AS_IHDSS-AB_000031, so each row
     #    is stored under the last part of that path. (The "Caal id" column,
@@ -125,36 +142,46 @@ def main() -> None:
         }
 
     # 2. Find the article folder and its files.
-    folder = find_article_folder(RDSS_PATH, rows_by_folder_name, index)
-    row = rows_by_folder_name[folder.name]
-    files = sorted(
-        path
-        for path in folder.iterdir()
-        if path.suffix.lower() in {".pdf", ".tif", ".tiff"}
-    )
-    print(f"Folder:  {folder}")
-    print(f"CAAL id: {row['Caal id']}")
-    print(f"Files:   {len(files)} in folder, uploading {len(files[:max_files])}")
-    files = files[:max_files]  # files[:None] keeps them all
+    folder_paths = [
+        find_article_folder(RDSS_PATH, rows_by_folder_name, i) for i in range(index, index + num_articles)
+    ]
+    rows = [rows_by_folder_name[f.name] for f in folder_paths]
+    files = [
+        sorted(path for path in f.iterdir()
+               if path.suffix.lower() in {".pdf", ".tif", ".tiff"}
+        ) for f in folder_paths
+    ]
+
+    print(f"Folders:  {[f.name for f in folder_paths]}")
+    print(f"CAAL ids: {[row['Caal id'] for row in rows]}")
+    print(f"Files:   {len(files)} in folder, uploading {len([f[:max_files] for f in files])}")
+    files = [f[:max_files] for f in files]  # files[:None] keeps them all
 
     # 3. Create the draft article.
-    metadata = {"title": row["English Title"], "description": row["Description"]}
-    created = figshare("POST", "/account/articles", json=metadata)
-    article_id = int(created["location"].split("/")[-1])
-    print(f"Created draft article {article_id}")
+    metadata = [{"title": r["English Title"], "description": r["Description"]} for r in rows]
+    created = [figshare("POST", "/account/articles", json=m) for m in metadata]
+    article_ids = [int(c["location"].split("/")[-1]) for c in created]
+    print(f"Created draft articles {article_ids}")
 
     # 4. Upload the files.
-    for path in files:
-        print(f"Uploading {path.name}")
-        upload_file(article_id, path)
+    for i in range(len(files)):
+        f = files[i]
+        for path in f:
+            if args.verbose:
+                print(f"Uploading {path.name}")
+            upload_file(article_ids[i], path)
 
     # 5. Fetch the article and show what was uploaded.
-    article = figshare("GET", f"/account/articles/{article_id}")
-    print(f"\nArticle ID: {article_id}")
-    print(f"Title:      {article['title']}")
-    print(f"Status:     {article['status']}")
-    print(f"Files:      {len(article['files'])} on Figshare, {len(files)} expected")
-    print(f"URL:        {article['url_private_html']}")
+    articles = [figshare("GET", f"/account/articles/{i}") for i in article_ids]
+    print(f"\n{len(articles)} articles on Figshare, {len(article_ids)} expected")
+    print(f"{round((time.perf_counter() - time_start)/60, 2)} minutes elapsed")
+    if args.verbose:
+        for i in range(len(articles)):
+            print(f"\nArticle ID: {article_ids[i]}")
+            print(f"Title:      {articles[i]['title']}")
+            print(f"Status:     {articles[i]['status']}")
+            print(f"Files:      {len(articles[i]['files'])} on Figshare, {len(files[i])} expected")
+            print(f"URL:        {articles[i]['url_private_html']}")
 
 
 if __name__ == "__main__":
