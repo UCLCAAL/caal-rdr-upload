@@ -41,6 +41,7 @@ classifiers = [
     "Typing :: Typed",
 ]
 dependencies = [
+    "python-dotenv",
     "requests",
 ]
 description = "Bulk uploads of CAAL monument reports and metadata to UCL RDR via Figshare API"

@@ -24,12 +24,10 @@ R drive.
 2. Connect to the UCL VPN and make sure RDSS is mounted (e.g. as R:). If RDSS
    or the CSV are somewhere else, change RDSS_PATH and CSV_PATH under "Settings" below.
 
-3. In PowerShell, from the repository root, set your token (it lasts until
-   you close the terminal):
+3. Paste your token into the .env file in the repository root (create it if
+   it is missing; it is git-ignored, so it is never committed):
 
-       $env:RDR_FIGSHARE_TOKEN = "<your token>"
-
-   (macOS/Linux: export RDR_FIGSHARE_TOKEN="<your token>")
+       RDR_FIGSHARE_TOKEN=<your token>
 
 4. Run the script:
 
@@ -45,10 +43,13 @@ from pathlib import Path
 from typing import Any
 
 import requests
+from dotenv import load_dotenv
+
+load_dotenv()  # reads RDR_FIGSHARE_TOKEN from the .env file into the environment
 
 # --- Settings ----------------------------------------------------------------
 # Change the paths if RDSS or the CSV are somewhere else. The token is read
-# from the command line (see "How to run" above), so it is never in the code.
+# from the .env file (see "How to run" above), so it is never in the code.
 RDSS_PATH = Path("R:/KG")  # RDSS folder to search for article folders
 CSV_PATH = Path("data/caal_archive_en.csv")  # Marco's archive CSV
 TOKEN = os.environ["RDR_FIGSHARE_TOKEN"]  # Figshare personal token
