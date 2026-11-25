@@ -186,8 +186,14 @@ def main() -> None:
     files = [f[:max_files] for f in files]  # files[:None] keeps them all
 
     # 3. Create the draft article.
+    # NOTE: use autotranslated "Original Title" instead of English Title
     metadata = [
-        {"title": r["English Title"], "description": r["Description"]} for r in rows
+        {
+            "title": f"{r['English Title']} / {r['Original Title']} \
+         [CAAL_ID: {r['Caal id']}]",
+            "description": r["Description"],
+        }
+        for r in rows
     ]
     created = [figshare("POST", "/account/articles", json=m) for m in metadata]
     article_ids = [int(c["location"].split("/")[-1]) for c in created]
