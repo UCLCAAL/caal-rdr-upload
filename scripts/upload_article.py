@@ -39,7 +39,6 @@ R drive.
 import argparse
 import csv
 import os
-import re
 import sys
 import time
 from pathlib import Path
@@ -59,6 +58,15 @@ TOKEN = os.environ["RDR_FIGSHARE_TOKEN"]  # Figshare personal token
 MAX_FILES = None  # how many files to upload per article; None = all of them
 
 FIGSHARE_API = "https://api.figshare.com/v2"
+
+TITLE_FIELDS = ["English Title", "Original Title", "Caal id"]
+DESCRIPTION_FIELDS = [
+    "Copyright Holder Name",
+    "Number and Type of Original Material",
+    "Size and Dimensions of Original Material",
+    "Dates of Original Material",
+    "Author of the Original Material",
+]
 
 
 def figshare(method: str, url: str, **kwargs: Any) -> Any:  # noqa: ANN401
@@ -92,44 +100,49 @@ def upload_file(article_id: int, path: Path) -> None:
     figshare("POST", f"{files_url}/{file_info['id']}")
 
 
-def find_article_folder(
-    rdss_path: Path, rows_by_folder_name: dict, index: int = 0
-) -> Path:
+def find_article_folders(
+    rdss_path: Path, records: dict, index: int = 0, num_articles: int = 1
+) -> list[Path]:
     """
-    Return an article folder (named like ..._000031) that has a CSV row.
+    Return article folders that have a CSV row, in name order, from index on.
 
-    Matching folders are counted in name order: index 0 is the first one,
-    index 1 the second, and so on.
+    NOTE: We are using the record_keys (that should (?) match to record folder names),
+    rather than the "Digital Folder Name" column in the archive CSV, because there are
+    over 3,000 mismatches due to issues with the paths listed in the CSV (see #26).
     """
-    count = 0
+    folders = []
     for dirpath, dirnames, _ in os.walk(rdss_path):
-        # Sorting dirnames in place makes os.walk visit folders in name order,
-        # so the same index always gives the same folder.
         dirnames.sort()
         folder = Path(dirpath)
-        if re.search(r"_\d{6}$", folder.name) and folder.name in rows_by_folder_name:
-            if count == index:
-                return folder
-            count += 1
-    sys.exit(f"Only {count} article folders with a CSV row found in {rdss_path}")
+        if folder.name in records:
+            folders.append(folder)
+            if len(folders) == index + num_articles:
+                return folders[index:]
+    sys.exit(f"Only {len(folders)} article folders with a CSV row found in {rdss_path}")
 
 
 def main() -> None:
     """Upload the first CAAL article as a draft."""
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "-i", "--start_index", type=int, default=0,
-        help="index of first row to start with in archive csv (default = 0)"
+        "-i",
+        "--start_index",
+        type=int,
+        default=0,
+        help="index of first row to start with in archive csv (default = 0)",
     )
     parser.add_argument(
-        "-b", "--bulk_upload", type=int, default=1,
-        help="number of articles to upload (default = 1)"
+        "-b",
+        "--bulk_upload",
+        type=int,
+        default=1,
+        help="number of articles to upload (default = 1)",
     )
     parser.add_argument("-v", "--verbose", action="store_true")
     args = parser.parse_args()
     index = args.start_index  # which article; 0 = first
     num_articles = args.bulk_upload  # number of articles to upload
-    max_files = 1
+    max_files = 3
     time_start = time.perf_counter()
 
     # 1. Read the CSV. "Digital Folder Name" is the folder's path on RDSS, e.g.
@@ -137,29 +150,45 @@ def main() -> None:
     #    is stored under the last part of that path. (The "Caal id" column,
     #    e.g. Ar_KG_AS-000102, does not appear in folder names.)
     with CSV_PATH.open(encoding="utf-8-sig", newline="") as fh:
-        rows_by_folder_name = {
+        records = {
             row["Digital Folder Name"].strip().split("/")[-1]: row
             for row in csv.DictReader(fh)
         }
 
+    # Only keep a subset of records, selected by Caal id.
+    caal_ids = {
+        "Ar_KG_AS-000147",
+        "Ar_KG_AS-000140",
+        "Ar_KG_AS-000129",
+    }
+    records = {
+        key: row for key, row in records.items() if row["Caal id"].strip() in caal_ids
+    }
+
     # 2. Find the article folder and its files.
-    folder_paths = [
-        find_article_folder(RDSS_PATH, rows_by_folder_name, i) for i in range(index, index + num_articles)
-    ]
-    rows = [rows_by_folder_name[f.name] for f in folder_paths]
+    folder_paths = find_article_folders(RDSS_PATH, records, index, num_articles)
+    rows = [records[f.name] for f in folder_paths]
     files = [
-        sorted(path for path in f.iterdir()
-               if path.suffix.lower() in {".pdf", ".tif", ".tiff"}
-        ) for f in folder_paths
+        sorted(
+            path
+            for path in f.iterdir()
+            if path.suffix.lower() in {".pdf", ".tif", ".tiff"}
+        )
+        for f in folder_paths
     ]
 
     print(f"Folders:  {[f.name for f in folder_paths]}")
     print(f"CAAL ids: {[row['Caal id'] for row in rows]}")
-    print(f"Files:   {len(files)} in folder, uploading {len([f[:max_files] for f in files])}")
+    print(
+        f"Files: {len(files)} in folder,",
+        f"uploading {len([f[:max_files] for f in files])}",
+    )
     files = [f[:max_files] for f in files]  # files[:None] keeps them all
 
     # 3. Create the draft article.
-    metadata = [{"title": r["English Title"], "description": r["Description"]} for r in rows]
+    metadata = [
+        {"title": r["English Title"], "description": r["Description"]} for r in rows
+    ]
     created = [figshare("POST", "/account/articles", json=m) for m in metadata]
     article_ids = [int(c["location"].split("/")[-1]) for c in created]
     print(f"Created draft articles {article_ids}")
@@ -175,13 +204,16 @@ def main() -> None:
     # 5. Fetch the article and show what was uploaded.
     articles = [figshare("GET", f"/account/articles/{i}") for i in article_ids]
     print(f"\n{len(articles)} articles on Figshare, {len(article_ids)} expected")
-    print(f"{round((time.perf_counter() - time_start)/60, 2)} minutes elapsed")
+    print(f"{round((time.perf_counter() - time_start) / 60, 2)} minutes elapsed")
     if args.verbose:
         for i in range(len(articles)):
             print(f"\nArticle ID: {article_ids[i]}")
             print(f"Title:      {articles[i]['title']}")
             print(f"Status:     {articles[i]['status']}")
-            print(f"Files:      {len(articles[i]['files'])} on Figshare, {len(files[i])} expected")
+            print(
+                f"Files:      {len(articles[i]['files'])} on Figshare,",
+                f" {len(files[i])} expected",
+            )
             print(f"URL:        {articles[i]['url_private_html']}")
 
 
