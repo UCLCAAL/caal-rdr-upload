@@ -165,6 +165,13 @@ def main() -> None:
         key: row for key, row in records.items() if row["Caal id"].strip() in caal_ids
     }
 
+    if index > len(records)-1:
+        sys.exit(f"There are only {len(records)} records, please choose a different starting index.")
+
+    if num_articles > len(records)-index:
+        print(f"Specified number of articles is too high; decreasing to {len(records)-index}.")
+        num_articles = len(records)-index
+
     # 2. Find the article folder and its files.
     folder_paths = find_article_folders(RDSS_PATH, records, index, num_articles)
     rows = [records[f.name] for f in folder_paths]
