@@ -198,9 +198,20 @@ def main() -> None:
         {
             "title": f"{r[TITLE_FIELDS[0]].strip()} / {r[TITLE_FIELDS[1]].strip()} " \
                      f"[CAAL_ID: {r[TITLE_FIELDS[2]]}]",
+            # change "Copyright Holder Name" to "Owner" but retain all other description field names
             "description": f"{''.join([f'<i>{d if d != DESCRIPTION_FIELDS[0] else "Owner"}</i><br>{r[d].strip()}<br><br>'
                                        if r[d] else '' for d in DESCRIPTION_FIELDS])}",
             "authors": [{"name": "CAAL UCL"}],
+            # NOTE: if you are adding group and your account doesn't have access to
+            # Institute of Archaeology (21660), you can try ARC RSDG (59983) instead
+            # "group_id": 21660,  # "Institute of Archaeology"
+            "defined_type": "dataset",
+            "categories": [27274,   # "Archaeology not elsewhere classified"
+                           24907],  # "Architectural heritage and conservation"
+            "keywords": ["Central Asian Archaeological Landscapes", "Central Asian History",
+                         "Archaeology", "Architectural Heritage and Conservation"],
+            # NOTE: use license 12 for CC BY-NC-ND 4.0
+            "license": 11, # "CC BY-NC-SA 4.0"
         }
         for r in rows
     ]
