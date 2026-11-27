@@ -196,10 +196,11 @@ def main() -> None:
     # NOTE: later use autotranslated "Original Title" instead of English Title
     metadata = [
         {
-            "title": f"{r[TITLE_FIELDS[0]].strip()} / {r[TITLE_FIELDS[1]].strip()}" \
+            "title": f"{r[TITLE_FIELDS[0]].strip()} / {r[TITLE_FIELDS[1]].strip()} " \
                      f"[CAAL_ID: {r[TITLE_FIELDS[2]]}]",
             "description": f"{''.join([f'<i>{d if d != DESCRIPTION_FIELDS[0] else "Owner"}</i><br>{r[d].strip()}<br><br>'
                                        if r[d] else '' for d in DESCRIPTION_FIELDS])}",
+            "authors": [{"name": "CAAL UCL"}],
         }
         for r in rows
     ]
