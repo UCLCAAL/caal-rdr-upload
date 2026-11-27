@@ -53,7 +53,7 @@ load_dotenv()  # reads RDR_FIGSHARE_TOKEN from the .env file into the environmen
 # --- Settings ----------------------------------------------------------------
 # Change the paths if RDSS or the CSV are somewhere else. The token is read
 # from the .env file (see "How to run" above), so it is never in the code.
-RDSS_PATH = Path("R:/KG")  # RDSS folder to search for article folders
+RDSS_PATH = Path("R:/")  # RDSS folder to search for article folders
 CSV_PATH = Path("data/caal_archive_en.csv")  # Marco's archive CSV
 TOKEN = os.environ["RDR_FIGSHARE_TOKEN"]  # Figshare personal token
 MAX_FILES = 1  # how many files to upload per article; None = all of them
