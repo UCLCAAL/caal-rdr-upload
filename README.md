@@ -97,8 +97,8 @@ pre-commit run
 3. Connect to the UCL VPN.
 4. [Mount RDSS](https://www.ucl.ac.uk/research-innovation/advanced-research-computing/platforms-and-services/research-data-storage-service/how-mount-research-data-storage-service-windows) (we assume it's on `R:`).
 5. Open `scripts/upload_article.py` and check the settings variables.
-    - If the `RDSS_PATH` or `CSV_PATH` are not what you expect, change them now.
-    - Adjust `MAX_FILES` depending on how many files you would like to upload. You may wish to keep this number low for initial testing, as the upload process takes a long time.
+   - If the `RDSS_PATH` or `CSV_PATH` are not what you expect, change them now.
+   - Adjust `MAX_FILES` depending on how many files you would like to upload. You may wish to keep this number low for initial testing, as the upload process takes a long time.
 6. Make sure your venv has been activated and then run the article upload script with the following command:
 
 ```sh

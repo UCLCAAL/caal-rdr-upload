@@ -45,6 +45,7 @@ from pathlib import Path
 from typing import Any
 
 import requests
+
 from dotenv import load_dotenv
 
 load_dotenv()  # reads RDR_FIGSHARE_TOKEN from the .env file into the environment
@@ -67,6 +68,7 @@ DESCRIPTION_FIELDS = [
     "Dates of Original Material",
     "Author of the Original Material",
 ]
+OWNER_FIELD = "Owner"
 
 
 def figshare(method: str, url: str, **kwargs: Any) -> Any:  # noqa: ANN401
@@ -156,7 +158,7 @@ def main() -> None:
         }
 
     # Only keep a subset of records, selected by Caal id.
-    # TODO: this would be best placed elsewhere
+    # TODO: this would be best placed elsewhere  # noqa: TD002, TD003, FIX002
     caal_ids = {
         "Ar_KG_AS-000147",
         "Ar_KG_AS-000140",
@@ -166,12 +168,18 @@ def main() -> None:
         key: row for key, row in records.items() if row["Caal id"].strip() in caal_ids
     }
 
-    if index > len(records)-1:
-        sys.exit(f"There are only {len(records)} records, please choose a different starting index.")
+    if index > len(records) - 1:
+        sys.exit(
+            f"There are only {len(records)} records, "
+            "please choose a different starting index."
+        )
 
-    if num_articles > len(records)-index:
-        print(f"Specified number of articles is too high; decreasing to {len(records)-index}.")
-        num_articles = len(records)-index
+    if num_articles > len(records) - index:
+        print(
+            f"Specified number of articles is too high; "
+            f"decreasing to {len(records) - index}."
+        )
+        num_articles = len(records) - index
 
     # 2. Find the article folder and its files.
     folder_paths = find_article_folders(RDSS_PATH, records, index, num_articles)
@@ -197,22 +205,38 @@ def main() -> None:
     # NOTE: later use autotranslated "Original Title" instead of English Title
     metadata = [
         {
-            "title": f"{r[TITLE_FIELDS[0]].strip()} / {r[TITLE_FIELDS[1]].strip()} " \
-                     f"[CAAL_ID: {r[TITLE_FIELDS[2]]}]",
-            # change "Copyright Holder Name" to "Owner" but retain all other description field names
-            "description": f"{''.join([f'<i>{d if d != DESCRIPTION_FIELDS[0] else "Owner"}</i><br>{r[d].strip()}<br><br>'
-                                       if r[d] else '' for d in DESCRIPTION_FIELDS])}",
+            "title": f"{r[TITLE_FIELDS[0]].strip()} / {r[TITLE_FIELDS[1]].strip()} "
+            f"[CAAL_ID: {r[TITLE_FIELDS[2]]}]",
+            # change "Copyright Holder Name" to "Owner" but
+            # retain all other description field names
+            "description": f"{
+                ''.join(
+                    [
+                        f'<i>{d if d != DESCRIPTION_FIELDS[0] else OWNER_FIELD}</i>'
+                        f'<br>{r[d].strip()}<br><br>'
+                        if r[d]
+                        else ''
+                        for d in DESCRIPTION_FIELDS
+                    ]
+                )
+            }",
             "authors": [{"name": "CAAL UCL"}],
             # NOTE: if you are adding group and your account doesn't have access to
             # Institute of Archaeology (21660), you can try ARC RSDG (59983) instead
-            # "group_id": 21660,  # "Institute of Archaeology"
+            # "group_id": 21660,  # "Institute of Archaeology"  # noqa: ERA001
             "defined_type": "dataset",
-            "categories": [27274,   # "Archaeology not elsewhere classified"
-                           24907],  # "Architectural heritage and conservation"
-            "keywords": ["Central Asian Archaeological Landscapes", "Central Asian History",
-                         "Archaeology", "Architectural Heritage and Conservation"],
+            "categories": [
+                27274,  # "Archaeology not elsewhere classified"
+                24907,  # "Architectural heritage and conservation"
+            ],
+            "keywords": [
+                "Central Asian Archaeological Landscapes",
+                "Central Asian History",
+                "Archaeology",
+                "Architectural Heritage and Conservation",
+            ],
             # NOTE: use license 12 for CC BY-NC-ND 4.0
-            "license": 11, # "CC BY-NC-SA 4.0"
+            "license": 11,  # "CC BY-NC-SA 4.0"
         }
         for r in rows
     ]
