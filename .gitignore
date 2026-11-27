@@ -40,3 +40,6 @@ uv.lock
 
 # package version
 _version.py
+
+# Local data: archive metadata CSV and upload state (never commit)
+data/
