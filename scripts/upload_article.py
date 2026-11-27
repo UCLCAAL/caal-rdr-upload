@@ -55,7 +55,7 @@ load_dotenv()  # reads RDR_FIGSHARE_TOKEN from the .env file into the environmen
 RDSS_PATH = Path("R:/KG")  # RDSS folder to search for article folders
 CSV_PATH = Path("data/caal_archive_en.csv")  # Marco's archive CSV
 TOKEN = os.environ["RDR_FIGSHARE_TOKEN"]  # Figshare personal token
-MAX_FILES = None  # how many files to upload per article; None = all of them
+MAX_FILES = 1  # how many files to upload per article; None = all of them
 
 FIGSHARE_API = "https://api.figshare.com/v2"
 
@@ -142,7 +142,7 @@ def main() -> None:
     args = parser.parse_args()
     index = args.start_index  # which article; 0 = first
     num_articles = args.bulk_upload  # number of articles to upload
-    max_files = 3
+    max_files = MAX_FILES
     time_start = time.perf_counter()
 
     # 1. Read the CSV. "Digital Folder Name" is the folder's path on RDSS, e.g.
@@ -156,6 +156,7 @@ def main() -> None:
         }
 
     # Only keep a subset of records, selected by Caal id.
+    # TODO: this would be best placed elsewhere
     caal_ids = {
         "Ar_KG_AS-000147",
         "Ar_KG_AS-000140",
