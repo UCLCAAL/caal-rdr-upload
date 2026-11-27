@@ -193,12 +193,13 @@ def main() -> None:
     files = [f[:max_files] for f in files]  # files[:None] keeps them all
 
     # 3. Create the draft article.
-    # NOTE: use autotranslated "Original Title" instead of English Title
+    # NOTE: later use autotranslated "Original Title" instead of English Title
     metadata = [
         {
-            "title": f"{r['English Title']} / {r['Original Title']} \
-         [CAAL_ID: {r['Caal id']}]",
-            "description": r["Description"],
+            "title": f"{r[TITLE_FIELDS[0]].strip()} / {r[TITLE_FIELDS[1]].strip()}" \
+                     f"[CAAL_ID: {r[TITLE_FIELDS[2]]}]",
+            "description": f"{''.join([f'<i>{d if d != DESCRIPTION_FIELDS[0] else "Owner"}</i><br>{r[d].strip()}<br><br>'
+                                       if r[d] else '' for d in DESCRIPTION_FIELDS])}",
         }
         for r in rows
     ]
